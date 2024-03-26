@@ -1,0 +1,16 @@
+{
+    "books": [
+        {
+            "id": 1,
+            "name": "Los 7 habitos",
+            "autor": "Stephen R. Covey",
+            "year": 1989
+        },
+        {
+            "id": 2,
+            "name": "Padre rico, Padre pobre",
+            "autor": "Robert Kiyosaki",
+            "year": 1997
+        }
+    ]
+}
