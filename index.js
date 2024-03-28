@@ -1,8 +1,14 @@
 import express from 'express';
 import fs from "fs";
 import bodyParser from "body-parser";
+import request from 'request';
+import soap from 'soap';
+import xmlJs from 'xml-js';
 
 const app = express();
+const PORT = 3000; // Choose your desired port
+
+// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
 const readData = () => {
@@ -56,6 +62,40 @@ app.post("/books", (req, res) => {
     res.json(newBook);
 });
 
+app.post("/getData/:cedula", async (req, res) => {
+    const cedula = req.params.cedula;
+
+    try {
+        // Create a SOAP client
+        const client = await soap.createClientAsync('http://test.citas.med.ec:8082/Preprod/WsBsgRegistroCivil/WcfBsgRegCivil.svc?wsdl');
+        
+        // SOAP request parameters
+        const args = {
+            identificacion: cedula
+        };
+
+        // Make SOAP request
+        const result = await client.BusquedaPorNuiAsync(args);
+
+        res.json(result[0].BusquedaPorNuiResult);
+        // // Convert XML response to JSON
+        // const jsonResult = soapResponseToJson(result[0]);
+
+        // // Send JSON response
+        // res.json(jsonResult);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Function to convert XML SOAP response to JSON
+function soapResponseToJson(xml) {
+    // Logic to convert XML to JSON (You may use libraries like xml-js)
+    // For simplicity, let's assume xml-js library is used
+    const json = xmlJs.xml2json(xml, { compact: true, spaces: 4 });
+    return JSON.parse(json);
+}
+
 app.put("/books/:id", (req, res) => {
     const data = readData();
     const body = req.body;
@@ -78,6 +118,7 @@ app.delete("/books/:id", (req, res) => {
     res.json({ message: "Book delete successfully" });
 });
 
-app.listen(3000, () => {
-    console.log('Server listening on port 3000');
-});
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+ });
